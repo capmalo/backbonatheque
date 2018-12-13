@@ -11,5 +11,5 @@ shell:
 test:
 	./manage.py test
 
-devserve:
+rs:
 	./manage.py runserver
