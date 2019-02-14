@@ -39,13 +39,13 @@ class Album(models.Model):
     musician = models.ForeignKey(Musician, null=True, blank=True, on_delete=models.SET_NULL, related_name="albums")
 
     def toggle_playing(self, customer):
-        last_event = self.playbacks.filter(customer=customer).lastest()
+        last_event = self.playbacks.filter(customer=customer).order_by("-date_created").first()
         if not last_event or last_event.status == "STOP":
             status = "START"
         else:
             status = "STOP"
         playback = self.playbacks.create(customer=customer, status=status)
-        remote_url = reverse("/api/majors/playback")
+        remote_url = "http://localhost:8000" + reverse("major-playback-list")
         try:
             requests.post(remote_url, json=playback.serialize())
         except Exception as e:
@@ -67,7 +67,6 @@ class Playback(models.Model):
             "customer": self.customer_id,
             "album": self.album_id,
         }
-
 
 class WriterAgent(models.Model):
     name = models.TextField()
