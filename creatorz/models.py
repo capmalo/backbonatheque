@@ -47,9 +47,11 @@ class Album(models.Model):
         playback = self.playbacks.create(customer=customer, status=status)
         remote_url = "http://localhost:8000" + reverse("major-playback-list")
         try:
-            requests.post(remote_url, json=playback.serialize())
+            response = requests.post(remote_url, json=playback.serialize(), timeout=1)
+            if response.status_code != 201:
+                logger.exception("Error occured")
         except Exception as e:
-            logger.exception(e)
+            logger.exception("Timeout occured")
 
 
 class Playback(models.Model):
