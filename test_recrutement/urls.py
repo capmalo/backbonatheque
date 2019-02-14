@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from creatorz.api import MusicianViewSet, WriterViewSet
-
+from major.urls import major_router
 
 api_router = DefaultRouter()
 api_router.register(r'musician', MusicianViewSet)
@@ -26,5 +26,5 @@ api_router.register(r'writer', WriterViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(api_router.urls))
+    path('api/', include(api_router.urls + major_router.urls))
 ]
