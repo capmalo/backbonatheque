@@ -1,5 +1,15 @@
+import requests
+import logging
 from django.db import models
 from django.utils.timezone import now
+from django.urls import reverse
+
+logger = logging.getLogger()
+
+
+class Customer(models.Model):
+    firstname = models.TextField()
+    lastname = models.TextField()
 
 
 class MusicianAgent(models.Model):
@@ -27,6 +37,36 @@ class Album(models.Model):
     release_date = models.DateField()
     nb_tracks = models.PositiveIntegerField()
     musician = models.ForeignKey(Musician, null=True, blank=True, on_delete=models.SET_NULL, related_name="albums")
+
+    def toggle_playing(self, customer):
+        last_event = self.playbacks.filter(customer=customer).lastest()
+        if not last_event or last_event.status == "STOP":
+            status = "START"
+        else:
+            status = "STOP"
+        playback = self.playbacks.create(customer=customer, status=status)
+        remote_url = reverse("/api/majors/playback")
+        try:
+            requests.post(remote_url, json=playback.serialize())
+        except Exception as e:
+            logger.exception(e)
+
+
+class Playback(models.Model):
+    date_created = models.DateTimeField(auto_now_add=True, null=True)
+    status = models.CharField(max_length=100, choices=(
+        ("START", "Customer starts playing"),
+        ("STOP", "Customer stops playing"),
+    ))
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="playbacks")
+    album = models.ForeignKey(Album, on_delete=models.PROTECT, related_name="playbacks")
+
+    def serialize(self):
+        return {
+            "status": self.status,
+            "customer": self.customer_id,
+            "album": self.album_id,
+        }
 
 
 class WriterAgent(models.Model):
