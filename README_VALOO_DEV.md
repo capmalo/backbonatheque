@@ -1,3 +1,6 @@
+Creator: Malo FERNDNADEZ
+Test technique - stage développeur Python Valoo
+
 Ce readme apporte quelques explications nécessaires sur mon travail sur ce test technique.
 
 Tout d'abord, je tiens à dire que j'ai traité les 3 contraintes, mais que ce n'est pas fonctionnel car je ne connais pas du tout Django et je n'ai pas eu le temps d'étudier comment faire des bases de données avec.
