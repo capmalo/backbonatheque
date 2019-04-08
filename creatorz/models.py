@@ -5,6 +5,10 @@ from django.utils.timezone import now
 from django.urls import reverse
 
 logger = logging.getLogger()
+server_url = "http://localhost:8000"
+was_timeout = False
+errorcpt = 0
+prev_errorcpt = 0
 
 
 class Customer(models.Model):
@@ -44,16 +48,48 @@ class Album(models.Model):
             status = "START"
         else:
             status = "STOP"
+            
         playback = self.playbacks.create(customer=customer, status=status)
-        remote_url = "http://localhost:8000" + reverse("major-playback-list")
+        remote_url = server_url + reverse("major-playback-list")
+
+        ping_test = os.system("ping -n 1 " + remote_url)
+        if(ping_test):
+            if(!was_timeout):
+                send_data(remote_url, playback)
+            else:
+                #resend previous data, if ok, delete from cache:
+                #for data in cache_database:
+                    send_data(remote_url, data)
+                    if !was_timeout and prev_errorcpt == errorcpt:
+                        #cache_database.delete(data)
+                    else:
+                        prev_errorcpt = errorcpt
+                #then send actual data:
+                send_data(remote_url, playback)
+        else:
+            logger.exception("Timeout occured")
+            timeout_handling(playback)
+
+    def send_data(remote_url, playback):
         try:
             response = requests.post(remote_url, json=playback.serialize(), timeout=1)
             if response.status_code != 201:
                 logger.exception("Error occured")
+                error_handling(response.status_code, playback)
+            was_timeout = False
         except Exception as e:
             logger.exception("Timeout occured")
+            timeout_handling(playback)	
+			
+    def error_handling(error, playback):
+        errorcpt += 1
+        #error_database.add(error)
+        #error_database.add(playback)
 
-
+    def timeout_handling(playback):
+        was_timeout = True
+        #cache_database.add(playback)
+        
 class Playback(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, null=True)
     status = models.CharField(max_length=100, choices=(
