@@ -18,12 +18,12 @@ class syncro():
         #resend previous data, if ok, delete from cache:
         #for data in error_database:
             send_data(remote_url, data)
-			if !was_timeout and prev_errorcpt == errorcpt:
-				#error_database.delete(data)
+	    if was_timeout == False and prev_errorcpt == errorcpt:
+                #error_database.delete(data)
             else:
                 prev_errorcpt = errorcpt
 			
-	def send_data(remote_url, data):
+    def send_data(remote_url, data):
         try:
             response = requests.post(remote_url, json=data.serialize(), timeout=1)
             if response.status_code != 201:

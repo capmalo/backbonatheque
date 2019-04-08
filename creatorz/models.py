@@ -54,13 +54,13 @@ class Album(models.Model):
 
         ping_test = os.system("ping -n 1 " + remote_url)
         if(ping_test):
-            if(!was_timeout):
+            if was_timeout == False:
                 send_data(remote_url, playback)
             else:
                 #resend previous data, if ok, delete from cache:
                 #for data in cache_database:
                     send_data(remote_url, data)
-                    if !was_timeout and prev_errorcpt == errorcpt:
+                    if was_timeout == False and prev_errorcpt == errorcpt:
                         #cache_database.delete(data)
                     else:
                         prev_errorcpt = errorcpt
